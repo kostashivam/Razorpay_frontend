@@ -2,19 +2,18 @@ import { useState, useEffect } from "react";
 import "../App";
 import axios from "axios";
 import cross from "../cross_icon.png";
-import { BACKEND_URL } from "../config";
+import { REACT_APP_BACKEND_URL,REACT_APP_FRONTEND_URL } from "../config";
 
 const ViewVirtualAccount = () => {
   const [data, setData] = useState("");
   const [modal, setModal] = useState(false);
   const [date, setDate] = useState();
 
-  console.log("####",process.env.BACKEND_URL)
   // INTEGRATE API OF VIEW ALL VIRTUAL ACCOUNTS
   useEffect(() => {
     axios({
       method: "get",
-      url: `http://localhost:5000/v1/all_virtual_accounts/callback`,
+      url: `${REACT_APP_BACKEND_URL}/all_virtual_accounts/callback`,
     })
       .then((response) => {
         setData(response.data.virtualAccounts.items);
@@ -36,7 +35,7 @@ const ViewVirtualAccount = () => {
     try {
       axios({
         method: "POST",
-        url: `http://localhost:5000/v1/virtual_accounts/${id}/close`,
+        url: `${REACT_APP_BACKEND_URL}/virtual_accounts/${id}/close`,
       }).then((response) => {
         window.location.reload();
       });
@@ -50,7 +49,7 @@ const ViewVirtualAccount = () => {
     setModal(true);
     axios({
       method: "get",
-      url: `http://localhost:5000/v1/virtual_accounts/${id}`,
+      url: `${REACT_APP_BACKEND_URL}/virtual_accounts/${id}`,
     })
       .then((response) => {
         setData(response.data.response.items);
@@ -66,7 +65,7 @@ const ViewVirtualAccount = () => {
   };
 
   const createAccount = () => {
-    window.location.href = "http://localhost:3000/";
+    window.location.href = `${REACT_APP_FRONTEND_URL}`;
   };
   return (
     <>

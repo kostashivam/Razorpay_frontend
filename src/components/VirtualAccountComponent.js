@@ -1,11 +1,11 @@
 import { useState } from "react";
 import "../App";
+import { REACT_APP_BACKEND_URL, REACT_APP_FRONTEND_URL } from "../config";
 
 function VirtualAccount() {
   const [customer_name, setCustomer_name] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState(false);
-
 
   // INTEGRATE API OF CREATE VIRTUAL ACCOUNT
   function handleSubmit(e) {
@@ -17,7 +17,7 @@ function VirtualAccount() {
       setError(true);
       return false;
     } else {
-      fetch("http://localhost:5000/v1/virtual_accounts", {
+      fetch(`${REACT_APP_BACKEND_URL}/virtual_accounts`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -29,7 +29,7 @@ function VirtualAccount() {
           .json()
           .then(() => {
             if (result.status === 201) {
-              window.location.href = "http://localhost:3000/virtual";
+              window.location.href = `${REACT_APP_FRONTEND_URL}/virtual`;
               setCustomer_name("");
               setDescription("");
             } else {
