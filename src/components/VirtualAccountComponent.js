@@ -1,38 +1,47 @@
 import { useState } from "react";
-import '../App'
+import "../App";
 
 function VirtualAccount() {
-
   const [customer_name, setCustomer_name] = useState("");
   const [description, setDescription] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
 
-  function handleClick(e) {
+
+  // INTEGRATE API OF CREATE VIRTUAL ACCOUNT
+  function handleSubmit(e) {
     e.preventDefault();
-    fetch("http://localhost:5000/v1/virtual_accounts", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ customer_name, description }),
-    }).then((result) => {
-      result
-        .json()
-        .then((resp) => {
-          if (result.status === 201) {
-            window.location.href = "http://localhost:3000/virtual";
-            setCustomer_name("");
-            setDescription("");
-          } else {
-            const error1 = "Invalid Login";
-            setError(error1);
-          }
-        })
-        .catch((error) => {
-          console.log("Data not saved", error);
-        });
-    });
+    if (description === "" && customer_name === "") {
+      setError(true);
+      return false;
+    } else if (description === "") {
+      setError(true);
+      return false;
+    } else {
+      fetch("http://localhost:5000/v1/virtual_accounts", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ customer_name, description }),
+      }).then((result) => {
+        result
+          .json()
+          .then(() => {
+            if (result.status === 201) {
+              window.location.href = "http://localhost:3000/virtual";
+              setCustomer_name("");
+              setDescription("");
+            } else {
+              const error1 = "Invalid Login";
+              setError(error1);
+            }
+          })
+          .catch((error) => {
+            console.log("Data not saved", error);
+          });
+      });
+    }
   }
 
   return (
@@ -50,6 +59,9 @@ function VirtualAccount() {
               value={customer_name}
               onChange={(e) => setCustomer_name(e.target.value)}
             />
+            {error && customer_name.trim() === "" && (
+              <p className="invalid_error">Customer is required</p>
+            )}
             <div className="text98">Description</div>
             <input
               type="text"
@@ -58,9 +70,10 @@ function VirtualAccount() {
               name="description"
               value={description}
             />
-            <div></div>
-            <span className="invalid_error">{error}</span>
-            <button className="btn" onClick={handleClick} >
+            {error && description.trim() === "" && (
+              <p className="invalid_error">Description is required</p>
+            )}
+            <button className="btn" onClick={handleSubmit}>
               Create Account
             </button>
           </div>

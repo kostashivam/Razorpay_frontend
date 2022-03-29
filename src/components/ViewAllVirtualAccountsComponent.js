@@ -2,57 +2,71 @@ import { useState, useEffect } from "react";
 import "../App";
 import axios from "axios";
 import cross from "../cross_icon.png";
+import { BACKEND_URL } from "../config";
 
 const ViewVirtualAccount = () => {
   const [data, setData] = useState("");
   const [modal, setModal] = useState(false);
-console.log(data)
+  const [date, setDate] = useState();
+
+  console.log("####",process.env.BACKEND_URL)
+  // INTEGRATE API OF VIEW ALL VIRTUAL ACCOUNTS
   useEffect(() => {
     axios({
       method: "get",
       url: `http://localhost:5000/v1/all_virtual_accounts/callback`,
     })
       .then((response) => {
-        setData(response.data.virtualAccounts);
+        setData(response.data.virtualAccounts.items);
+
+        for (let i = 0; i <= response.data.virtualAccounts.items.length; i++) {
+          const unixTime = response.data.virtualAccounts.items[i].created_at;
+          const responseDate = new Date(unixTime * 1000);
+          const newDate = responseDate.toLocaleDateString("en-US");
+          setDate(newDate);
+        }
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
 
-  const closeAccount = (id,id2) => {
+  // INTEGRATE API OF CLOSE VIRTUAL ACCOUNT
+  const closeAccount = (id) => {
     try {
-      let url = `http://localhost:5000/v1/virtual_accounts/${id}`;
-      axios.post(url).then((res) => {
-        // window.location.reload()
-        console.log("res", res);
+      axios({
+        method: "POST",
+        url: `http://localhost:5000/v1/virtual_accounts/${id}/close`,
+      }).then((response) => {
+        window.location.reload();
       });
-      try {
-        let url2 = `https://api.razorpay.com/v1/virtual_accounts/${id}/close`;
-      axios.post(url2, "", {
-        headers: {
-          "Authorizations": "Basic cnpwX3Rlc3RfZG53VGV1T3c4NlEyckI6T1NpY0hWSlY3VkhtaDh1RldYMW0yeVpB",
-          "Access-Control-Allow-Origin": "*"
-        }
-      }).then((err,resp) => {
-        if(resp){
-          console.log(resp);
-        }
-      })
-      } catch (error) {
-        console.log(error);
-      }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const makePayment = () => {
+  // INTEGRATE API OF VIEW VIRTUAL ACCOUNTS BY ID
+  const viewAccounts = (id) => {
     setModal(true);
+    axios({
+      method: "get",
+      url: `http://localhost:5000/v1/virtual_accounts/${id}`,
+    })
+      .then((response) => {
+        setData(response.data.response.items);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const closeModal = () => {
     setModal(false);
+    window.location.reload();
+  };
+
+  const createAccount = () => {
+    window.location.href = "http://localhost:3000/";
   };
   return (
     <>
@@ -61,30 +75,33 @@ console.log(data)
           <div className="close">
             <div className="modal">
               <img src={cross} className="logo" onClick={closeModal} />
-              <div className="text67">
-                <div style={{ fontSize: "28px" }}>Create Test Payment</div>
-                <div className="text98">Amount(INR)</div>
-                <input
-                  type="text"
-                  placeholder="Amount"
-                  name="amount"
-                />
-                <div className="text98">Method</div>
-                <select name="cars" id="cars" className="text98">
-                  <option value="neft">NEFT</option>
-                  <option value="rtgs">RTGS</option>
-                  <option value="imps">IMPS</option>
-                </select>
-                <div></div>
-                <button type="button" class="btn btn-primary">
-                  Create
-                </button>
-              </div>
+              <table>
+                <h1>View Payments</h1>
+                <tr>
+                  <th>Payment Id</th>
+                  <th>Amount</th>
+                  <th>Created At</th>
+                  <th>Status</th>
+                </tr>
+
+                {data.length > 0 &&
+                  data.map((item, key) => {
+                    return (
+                      <tr key={item.id}>
+                        <td>{item.id}</td>
+                        <td>{item.amount / 100}</td>
+                        <td>{date}</td>
+                        <td>{item.status}</td>
+                      </tr>
+                    );
+                  })}
+              </table>
             </div>
           </div>
         </>
       )}
       <table>
+        <h1>Virtual Accounts</h1>
         <tr>
           <th>Account Id</th>
           <th>created date</th>
@@ -96,36 +113,38 @@ console.log(data)
         {data.length > 0 &&
           data
             .filter((items) => {
-              return items.isDeleted === "true";
+              return items.status === "active";
             })
             .map((item, key) => {
               return (
-                <tr key={item._id}>
-                  <td>{item._id}</td>
-                  <td>{item.updatedAt}</td>
-                  <td>{item.amount}</td>
-
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{date}</td>
+                  <td>{item.amount_paid / 100}</td>
                   <td>
                     <button
                       class="btn1 btn-danger"
-                      onClick={() => closeAccount(item._id)}
+                      onClick={() => closeAccount(item.id)}
                     >
-                      Delete
+                      Close Account
                     </button>
                   </td>
                   <td>
                     <button
-                      onClick={() => makePayment(item._id)}
+                      onClick={() => viewAccounts(item.id)}
                       type="button"
                       class="btn2 btn-success"
                     >
-                      Make Payment
+                      View Accounts
                     </button>
                   </td>
                 </tr>
               );
             })}
       </table>
+      <button onClick={() => createAccount()} type="button" class="btn-success">
+        Create Virtual Account
+      </button>
     </>
   );
 };

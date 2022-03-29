@@ -55,8 +55,8 @@
   border-radius: 24px;
 }
 .modal {
-  width: 500px;
-  height: 500px;
+  width: 90%;
+  height: 40%;
   background-color: gray;
   z-index: 99;
   position: absolute;
@@ -66,8 +66,8 @@
   border-radius: 24px;
 }
 .logo {
-  margin-left: 91%;
-  width: 43px;
+  margin-left: 96%;
+  width: 37px;
 }
 .logo12 {
   position: absolute;
